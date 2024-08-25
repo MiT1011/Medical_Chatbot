@@ -1,5 +1,6 @@
 from flask import Flask, render_template, jsonify, request
-from src.helper import DownloadEmbeddings
+from transformers import pipeline
+from src.helper import DownloadEmbeddings, HuggingFaceLLM
 from langchain_community.vectorstores import Pinecone
 import pinecone
 from langchain.prompts import PromptTemplate
@@ -9,11 +10,12 @@ from dotenv import load_dotenv
 from src.prompt import *
 import os
 
-app = Flask(__name__)
+# app = Flask(__name__)
 
 load_dotenv()
 
 os.environ['PINECONE_API_KEY'] = os.environ.get('PINECONE_API_KEY')
+# os.environ['HUGGINGFACE_API_KEY'] = os.environ.get('HUGGINGFACE_API_KEY')
 
 embeddings = DownloadEmbeddings()
 index_name = "medical-chatbot"
@@ -23,11 +25,19 @@ docsearch = Pinecone.from_existing_index(index_name, embeddings)
 PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
 chain_type_kwargs={"prompt": PROMPT}
 
-llm = CTransformers(model=r"model\llama-2-7b-chat.ggmlv3.q4_0.bin",
-                    # model=r"model\llama-2-7b-chat.ggmlv3.q2_K.bin",
-                    model_type="llama",
-                    config={'max_new_tokens': 512,
-                            'temperature': 0.8,})
+# llm = CTransformers(model=r"model\llama-2-7b-chat.ggmlv3.q4_0.bin",
+#                     # model=r"model\llama-2-7b-chat.ggmlv3.q2_K.bin",
+#                     model_type="llama",
+#                     config={'max_new_tokens': 512,
+#                             'temperature': 0.8,})
+
+
+llm = HuggingFaceLLM(
+    model_name="meta-llama/Llama-2-13b-chat-hf",
+    api_key=os.environ.get('HUGGINGFACE_API_KEY'),
+    max_length=200,
+    temperature=0.7
+)
 
 qa = RetrievalQA.from_chain_type(
     llm=llm,
@@ -37,19 +47,24 @@ qa = RetrievalQA.from_chain_type(
     chain_type_kwargs=chain_type_kwargs
 )
 
-# Default Route of the flask
-@app.route("/")
-def index():
-    return render_template("chat.html")
+# # Default Route of the flask
+# @app.route("/")
+# def index():
+#     return render_template("chat.html")
 
-@app.route("/get", methods=["GET", "POST"])
-def chat():
-    msg = request.form["msg"]
-# msg = "what is Therapeutic abortion?"
-    print(msg)
-    result=qa.invoke({"query":msg})
-    print("Response : ", result["result"])
-    return str(result["result"])
+# @app.route("/get", methods=["GET", "POST"])
+# def chat():
+#     msg = request.form["msg"]
+# # msg = "what is Therapeutic abortion?"
+#     print(msg)
+#     result=qa.invoke({"query":msg})
+#     print("Response : ", result["result"])
+#     return str(result["result"])
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(debug=True)
+
+msg = "what is Therapeutic abortion?"
+print(msg)
+result=qa.invoke({"query":msg})
+print("Response : ", result["result"])
