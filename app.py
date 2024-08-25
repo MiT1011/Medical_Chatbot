@@ -23,8 +23,8 @@ docsearch = Pinecone.from_existing_index(index_name, embeddings)
 PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
 chain_type_kwargs={"prompt": PROMPT}
 
-llm = CTransformers(model=r"model\llama-2-7b-chat.ggmlv3.q2_K.bin",
-                    # model=r"model\llama-2-7b-chat.ggmlv3.q4_0.bin",
+llm = CTransformers(model=r"model\llama-2-7b-chat.ggmlv3.q4_0.bin",
+                    # model=r"model\llama-2-7b-chat.ggmlv3.q2_K.bin",
                     model_type="llama",
                     config={'max_new_tokens': 512,
                             'temperature': 0.8,})

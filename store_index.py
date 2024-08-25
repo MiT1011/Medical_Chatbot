@@ -13,7 +13,6 @@ extracted_data = LoadPDF("data/")
 text_chunks = TextSplit(extracted_data)
 embeddings = DownloadEmbeddings()
 
-
 vectorstore_from_docs = PineconeVectorStore.from_documents(
     text_chunks,
     index_name=index_name,

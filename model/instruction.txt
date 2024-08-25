@@ -9,3 +9,7 @@ change the books for another domain
 delete the vector store make another for that
 deploy the application
 Try any another chat templates
+
+pythonanywhere (6 month)
+render
+digital ocean
